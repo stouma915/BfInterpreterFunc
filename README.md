@@ -1,2 +1,2 @@
 # BfInterpreterFunc
-Brainf**k interpreter function(pure)
+A pure function to run Brainf**k.
