@@ -7,7 +7,7 @@ data State = State
   , memory :: M.Map Int Int
   , pointer :: Int
   , output :: String
-  , hasError : Bool
+  , hasError :: Bool
   }
 
 evaluate :: String -> Maybe String
@@ -15,8 +15,59 @@ evaluate sourceCode = do
   let emptyMemory = M.fromList []
   let emptyState = State 0 emptyMemory 0 "" False
 
-  eval sourceCode emptyState
+  let result = eval sourceCode emptyState
+  if hasError result then
+    Nothing
+  else
+    Just $ output result
   where
+    evalOnce :: Char -> State -> State
+    evalOnce c state = do
+      let ind = index state
+      let mem = memory state
+      let ptr = pointer state
+      let out = output state
+      let err = hasError state
+
+      let newInd = ind + 1
+
+      case c of
+        '>' ->
+          State newInd mem (ptr + 1) out err
+        '<' -> do
+          let newPtr = if ptr >= 1 then ptr - 1 else ptr
+
+          State newInd mem newPtr out err
+        '+' ->
+          if not $ M.member ptr mem then
+            State newInd (M.insert ptr 1 mem) ptr out err
+          else do
+            let current = mem M.! ptr
+
+            if current >= 255 then
+              State newInd (M.update (\_ -> Just 0) ptr mem) ptr out err
+            else
+              State newInd (M.update (\x -> Just (x + 1)) ptr mem) ptr out err
+        '-' ->
+          if not $ M.member ptr mem then
+            State newInd (M.insert ptr 255 mem) ptr out err
+          else do
+            let current = mem M.! ptr
+
+            if current <= 0 then
+              State newInd (M.update (\_ -> Just 255) ptr mem) ptr out err
+            else
+              State newInd (M.update (\x -> Just (x - 1)) ptr mem) ptr out err
+        '.' ->
+          if not $ M.member ptr mem then
+            State newInd mem ptr (out ++ "\0") err
+          else do
+            let current = mem M.! ptr
+
+            State newInd mem ptr (out ++ [toEnum current :: Char]) err
+        _ ->
+          State newInd mem ptr out err
+
     eval :: String -> State -> State
     eval code state = do
       let ind = index state
@@ -24,50 +75,8 @@ evaluate sourceCode = do
       if ind >= length code then
         state
       else do
-        let newInd = ind + 1
+        let newState = evalOnce (code !! ind) state
 
-        let mem = memory state
-        let ptr = pointer state
-        let out = output state
-        let err = hasError state
-
-        let newState = case code !! ind of
-            '>' ->
-              State newInd mem (ptr + 1) out err
-            '<' -> do
-              let newPtr = if ptr >= 1 then ptr - 1 else ptr
-
-              State newInd mem newPtr out err
-            '+' ->
-              if not $ M.member ptr mem then
-                State newInd (M.insert ptr 1 mem) ptr out err
-              else do
-                let current = mem M.! ptr
-
-                if current >= 255 then
-                  State newInd (M.update (\_ -> Just 0) ptr mem) ptr out err
-                else
-                  State newInd (M.update (\x -> Just (x + 1)) ptr mem) ptr out err
-            '-' ->
-              if not $ M.member ptr mem then
-                State newInd (M.insert ptr 255 mem) ptr out err
-              else do
-                let current = mem M.! ptr
-
-                if current <= 0 then
-                  State newInd (M.update (\_ -> Just 255) ptr mem) ptr out err
-                else
-                  State newInd (M.update (\x -> Just (x - 1)) ptr mem) ptr out err
-            '.' ->
-              if not $ M.member ptr mem then
-                State newInd mem ptr (out ++ "\0") err
-              else do
-                let current = mem M.! ptr
-
-                State newInd mem ptr (out ++ [toEnum current :: Char]) err
-            _ ->
-              State newInd mem ptr out err
-        
         eval code newState
 
     searchLoopEnd :: String -> Int -> Maybe Int
