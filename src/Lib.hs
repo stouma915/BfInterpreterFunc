@@ -2,6 +2,14 @@ module Lib ( evaluate ) where
 
 import qualified Data.Map.Strict as M
 
+data State = State
+  { index :: Int
+  , memory :: M.Map Int Int
+  , pointer :: Int
+  , output :: String
+  , hasError : Bool
+  }
+
 evaluate :: String -> Maybe String
 evaluate sourceCode = do
   let emptyMemory = M.fromList []
@@ -9,14 +17,6 @@ evaluate sourceCode = do
 
   eval sourceCode emptyState
   where
-    data State = State {
-      index :: Int,
-      memory :: M.Map Int Int,
-      pointer :: Int,
-      output :: String,
-      hasError :: Bool
-    }
-
     eval :: String -> State -> State
     eval code state = do
       let ind = index state
