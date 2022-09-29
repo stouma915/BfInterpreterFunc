@@ -1,6 +1,7 @@
 module Lib ( evaluate ) where
 
 import qualified Data.Map.Strict as M
+import qualified Data.Text as T
 
 data State = State
   { index :: Int
@@ -21,8 +22,8 @@ evaluate sourceCode = do
   else
     Just $ output result
   where
-    evalOnce :: Char -> State -> State
-    evalOnce c state = do
+    evalOnce :: String -> State -> State
+    evalOnce code state = do
       let ind = index state
       let mem = memory state
       let ptr = pointer state
@@ -31,7 +32,7 @@ evaluate sourceCode = do
 
       let newInd = ind + 1
 
-      case c of
+      case code !! ind of
         '>' ->
           State newInd mem (ptr + 1) out err
         '<' -> do
@@ -65,17 +66,53 @@ evaluate sourceCode = do
             let current = mem M.! ptr
 
             State newInd mem ptr (out ++ [toEnum current :: Char]) err
+        '[' ->
+          case searchLoopEnd code ind of
+            Just loopEnd ->
+              let loopCode = substring newIndex loopEnd code
+              let afterLoop = substring (loopEnd + 1) (length code) code
+
+              let afterLoopState = loop loopCode afterLoop state
+              let memAfter = memory afterLoopState
+              let ptrAfter = pointer afterLoopState
+              let outAfter = output afterLoopState
+              let errAfter = hasError afterLoopState
+
+              State (loopEnd + 1) memAfter ptrAfter outAfter errAfter
+            Nothing ->
+              State newInd mem ptr out True
         _ ->
           State newInd mem ptr out err
+
+    loop :: String -> String -> State -> State
+    loop loopCode afterLoop state = do
+      let mem = memory state
+      let ptr = pointer state
+      let out = output state
+      let err = hasError state
+
+      let stateWithoutIndex = State 0 mem ptr out err
+
+      if err then
+        stateWithoutIndex
+      else if not $ M.member ptr mem || (mem M.! ptr) == 0 then
+        eval afterLoop stateWithoutIndex
+      else do
+        let newState = eval loopCode stateWithoutIndex
+
+        loop loopCode newState
 
     eval :: String -> State -> State
     eval code state = do
       let ind = index state
+      let err = hasError state
 
-      if ind >= length code then
+      if err then
+        state
+      else if ind >= length code then
         state
       else do
-        let newState = evalOnce (code !! ind) state
+        let newState = evalOnce code state
 
         eval code newState
 
@@ -98,3 +135,6 @@ evaluate sourceCode = do
                 search src newInd x (y + 1)
               _ ->
                 search src newInd x y
+
+    substring :: Int -> Int -> String -> String
+    substring start end str = T.unpack $ T.take (end - start) (T.drop start (T.pack str))
