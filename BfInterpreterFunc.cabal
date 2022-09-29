@@ -33,6 +33,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers >=0.6.4.1
+    , text >= 1.2.4.1
   default-language: Haskell2010
 
 executable BfInterpreterFunc-exe
@@ -46,6 +47,7 @@ executable BfInterpreterFunc-exe
       BfInterpreterFunc
     , base >=4.7 && <5
     , containers >=0.6.4.1
+    , text >= 1.2.4.1
   default-language: Haskell2010
 
 test-suite BfInterpreterFunc-test
@@ -60,4 +62,5 @@ test-suite BfInterpreterFunc-test
       BfInterpreterFunc
     , base >=4.7 && <5
     , containers >=0.6.4.1
+    , text >= 1.2.4.1
   default-language: Haskell2010
