@@ -70,7 +70,6 @@ evaluate sourceCode = do
           case searchLoopEnd code ind of
             Just loopEnd -> do
               let loopCode = substring newInd loopEnd code
-              let afterLoop = substring (loopEnd + 1) (length code) code
 
               let afterLoopState = loop loopCode afterLoop state
               let memAfter = memory afterLoopState
@@ -78,14 +77,14 @@ evaluate sourceCode = do
               let outAfter = output afterLoopState
               let errAfter = hasError afterLoopState
 
-              State (loopEnd + 1) memAfter ptrAfter outAfter errAfter
+              State loopEnd memAfter ptrAfter outAfter errAfter
             Nothing ->
               State newInd mem ptr out True
         _ ->
           State newInd mem ptr out err
 
-    loop :: String -> String -> State -> State
-    loop loopCode afterLoop state = do
+    loop :: String -> State -> State
+    loop loopCode state = do
       let mem = memory state
       let ptr = pointer state
       let out = output state
@@ -95,12 +94,14 @@ evaluate sourceCode = do
 
       if err then
         stateWithoutIndex
-      else if not $ M.member ptr mem || (mem M.! ptr) == 0 then
-        eval afterLoop stateWithoutIndex
+      else if not $ M.member ptr mem then
+        stateWithoutIndex
+      else if (mem M.! ptr) == 0 then
+        stateWithoutIndex
       else do
         let newState = eval loopCode stateWithoutIndex
 
-        loop loopCode afterLoop newState
+        loop loopCode newState
 
     eval :: String -> State -> State
     eval code state = do
