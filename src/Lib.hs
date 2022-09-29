@@ -68,7 +68,7 @@ evaluate sourceCode = do
             State newInd mem ptr (out ++ [toEnum current :: Char]) err
         '[' ->
           case searchLoopEnd code ind of
-            Just loopEnd ->
+            Just loopEnd -> do
               let loopCode = substring newIndex loopEnd code
               let afterLoop = substring (loopEnd + 1) (length code) code
 
