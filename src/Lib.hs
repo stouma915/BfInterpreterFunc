@@ -69,7 +69,7 @@ evaluate sourceCode = do
         '[' ->
           case searchLoopEnd code ind of
             Just loopEnd -> do
-              let loopCode = substring newIndex loopEnd code
+              let loopCode = substring newInd loopEnd code
               let afterLoop = substring (loopEnd + 1) (length code) code
 
               let afterLoopState = loop loopCode afterLoop state
@@ -100,7 +100,7 @@ evaluate sourceCode = do
       else do
         let newState = eval loopCode stateWithoutIndex
 
-        loop loopCode newState
+        loop loopCode afterLoop newState
 
     eval :: String -> State -> State
     eval code state = do
