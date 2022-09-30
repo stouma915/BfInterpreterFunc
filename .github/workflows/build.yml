@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         cabal update
-        if hspec-discover --version ; then
+        if ls ~/.cabal/bin/hspec-discover ; then
           echo "Found hspec-discover."
         else
           cabal install hspec-discover
