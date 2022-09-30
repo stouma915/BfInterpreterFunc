@@ -123,7 +123,7 @@ evaluate sourceCode = do
         search :: String -> Int -> Int -> Int -> Maybe Int
         search src ind x y =
           if y /= 0 && x == y then
-            Just (ind - 1)
+            Just $ ind - 1
           else if ind >= length src then
             Nothing
           else do
