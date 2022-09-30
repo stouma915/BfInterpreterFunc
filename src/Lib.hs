@@ -71,7 +71,7 @@ evaluate sourceCode = do
             Just loopEnd -> do
               let loopCode = substring newInd loopEnd code
 
-              let afterLoopState = loop loopCode afterLoop state
+              let afterLoopState = loop loopCode state
               let memAfter = memory afterLoopState
               let ptrAfter = pointer afterLoopState
               let outAfter = output afterLoopState
