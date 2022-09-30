@@ -9,4 +9,4 @@ spec = do
   describe "Lib.evaluate" $
     it "evaluates code and return output" $ do
       evaluate "----[---->+<]>++.+.+.+." `shouldBe` Just("ABCD")
-      evaluate "-[----->+<]>--.+.+.+.+.+.------." `shouldBe` Just("123456")
+      evaluate "-[----->+<]>--.+.+.+.+.+.------." `shouldBe` Just("1234560")
