@@ -121,15 +121,15 @@ evaluate sourceCode = do
     searchLoopEnd code startIndex = search code startIndex 0 0
       where
         search :: String -> Int -> Int -> Int -> Maybe Int
-        search src index x y =
+        search src ind x y =
           if y /= 0 && x == y then
-            Just (index - 1)
-          else if index >= length src then
+            Just (ind - 1)
+          else if ind >= length src then
             Nothing
           else do
-            let newInd = index + 1
+            let newInd = ind + 1
 
-            case src !! index of
+            case src !! ind of
               '[' ->
                 search src newInd (x + 1) y
               ']' ->
