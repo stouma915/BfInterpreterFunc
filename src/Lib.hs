@@ -16,8 +16,7 @@ evaluate sourceCode = do
   let emptyMemory = M.fromList []
   let emptyState = State 0 emptyMemory 0 "" False
 
-  let result = eval sourceCode emptyState
-  if hasError result then
+  if hasError $ eval sourceCode emptyState then
     Nothing
   else
     Just $ output result
